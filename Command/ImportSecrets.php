@@ -6,8 +6,8 @@ declare(strict_types=1);
 
 namespace Netresearch\VaultImport\Command;
 
-use Magento\Config\Console\Command\ConfigSet\ProcessorFacadeFactory;
-use Magento\Config\Console\Command\EmulatedAdminhtmlAreaProcessor;
+use Magento\Framework\Console\Cli;
+use Netresearch\VaultImport\Model\ImportSecretService;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -22,16 +22,21 @@ class ImportSecrets extends Command
     const SECRET_PATH_OPTION = 'secret_path';
 
     /**
-     * @var EmulatedAdminhtmlAreaProcessor
+     * @var ImportSecretService
      */
-    private $emulatedAreaProcessor;
+    private $secretService;
 
     /**
-     * The factory for processor facade.
+     * ImportSecrets constructor.
      *
-     * @var ProcessorFacadeFactory
+     * @param ImportSecretService $secretService
+     * @param string|null $name
      */
-    private $processorFacadeFactory;
+    public function __construct(ImportSecretService $secretService, $name = null)
+    {
+        $this->secretService = $secretService;
+        parent::__construct($name);
+    }
 
     protected function configure()
     {
@@ -44,12 +49,39 @@ class ImportSecrets extends Command
         parent::configure();
     }
 
+    /**
+     * Imports secrets from a specified vault storage api
+     *
+     * @param InputInterface $input
+     * @param OutputInterface $output
+     * @return int|null
+     * @throws \Psr\Cache\InvalidArgumentException
+     */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        try {
+            $this->secretService->importSecrets(
+                $input->getOption(self::HOST_OPTION),
+                $input->getOption(self::TOKEN_OPTION),
+                $input->getOption(self::SECRET_PATH_OPTION),
+                $input->getOption(self::PATH_PREFIX_OPTION)
+            );
+        } catch (\Exception $exception) {
+            $output->writeln("Could not fetch secrets or write config value: {$exception->getMessage()}");
 
+            return Cli::RETURN_FAILURE;
+        }
+
+        $output->writeln(
+            "Successfully imported secrets from  {$input->getOption(self::HOST_OPTION)}/{$input->getOption(self::SECRET_PATH_OPTION)}"
+        );
+
+        return Cli::RETURN_SUCCESS;
     }
 
     /**
+     * {@inheritdoc}
+     *
      * @return InputOption[]
      */
     private function getOptionsList(): array
@@ -57,28 +89,21 @@ class ImportSecrets extends Command
         return [
             new InputOption(
                 self::HOST_OPTION,
-                '-h',
+                '-u',
                 InputOption::VALUE_REQUIRED,
                 'The vault server to fetch secrets from.'
             ),
             new InputOption(
                 self::TOKEN_OPTION,
-                '-c',
+                '-t',
                 InputOption::VALUE_REQUIRED,
                 'Your authentification token for your vault'
             ),
             new InputOption(
                 self::SECRET_PATH_OPTION,
-                '-c',
+                '-s',
                 InputOption::VALUE_REQUIRED,
                 'The storage path of the secret to fetch'
-            ),
-            new InputOption(
-                self::PORT_OPTION,
-                '-p',
-                InputOption::VALUE_OPTIONAL,
-                'The port your vault server listens on.',
-                '8200'
             ),
             new InputOption(
                 self::PATH_PREFIX_OPTION,

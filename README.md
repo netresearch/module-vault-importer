@@ -10,7 +10,7 @@ Facts
 Description
 -----------
 
-//@TODO fill
+Enables you to import secrets from a [Vault](https://www.vaultproject.io/) secret storage and apply them (recursively) to the Magento config.
 
 Requirements
 ------------
@@ -55,10 +55,10 @@ The following sections describe how to uninstall the module from your Magento® 
 
 To unregister the shipping module from the application, run the following command:
 
-    ./bin/magento module:uninstall --remove-data Netresearch_VaultImport
+    ./bin/magento module:uninstall Netresearch_VaultImport
     composer update
     
-This will automatically remove source files, clean up the database, update package dependencies.
+This will automatically remove source files, update package dependencies.
 
 *Please note that automatic uninstallation is only available on Magento version 2.2 or newer.
 On Magento 2.1 and below, please use the following manual uninstallation method.*

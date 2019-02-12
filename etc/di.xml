@@ -3,4 +3,22 @@
 see LICENSE.md for license details
 -->
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <preference for="Netresearch\VaultImport\Webservice\VaultClientAdapterInterface" type="Netresearch\VaultImport\Webservice\VaultClientAdapter"/>
+    <type name="Magento\Framework\Console\CommandListInterface">
+        <arguments>
+            <argument name="commands" xsi:type="array">
+                <item name="vaultImport" xsi:type="object">Netresearch\VaultImport\Command\ImportSecrets</item>
+            </argument>
+        </arguments>
+    </type>
+    <type name="Netresearch\VaultImport\Command\ImportSecrets">
+        <arguments>
+            <argument name="secretService" xsi:type="object">Netresearch\VaultImport\Model\ImportSecretService\Proxy</argument>
+        </arguments>
+    </type>
+    <!--<type name="Netresearch\VaultImport\Model\ImportSecretService">-->
+        <!--<arguments>-->
+            <!--<argument name="processorFacadeFactory" xsi:type="object">Magento\Config\Console\Command\EmulatedAdminhtmlAreaProcessor\Proxy</argument>-->
+        <!--</arguments>-->
+    <!--</type>-->
 </config>
