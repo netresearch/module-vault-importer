@@ -9,17 +9,24 @@ namespace Netresearch\VaultImport\Command;
 use Magento\Framework\Console\Cli;
 use Netresearch\VaultImport\Model\ImportSecretService;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Command\HelpCommand;
+use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputArgumentFactory;
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
+/**
+ * Class ImportSecrets
+ *
+ * @package Netresearch\VaultImport\Command
+ */
 class ImportSecrets extends Command
 {
-    const HOST_OPTION = 'host';
-    const PORT_OPTION = 'port';
-    const TOKEN_OPTION = 'token';
-    const PATH_PREFIX_OPTION = 'path_prefix';
-    const SECRET_PATH_OPTION = 'secret_path';
+    const HOST_ARG = 'host';
+    const PORT_ARG = 'port';
+    const TOKEN_ARG = 'token';
+    const PATH_PREFIX_ARG = 'path_prefix';
+    const SECRET_PATH_ARG = 'secret_path';
 
     /**
      * @var ImportSecretService
@@ -27,24 +34,36 @@ class ImportSecrets extends Command
     private $secretService;
 
     /**
+     * @var InputArgumentFactory
+     */
+    private $inputArgFactory;
+
+    /**
      * ImportSecrets constructor.
      *
      * @param ImportSecretService $secretService
+     * @param InputArgumentFactory $inputArgFactory
      * @param string|null $name
      */
-    public function __construct(ImportSecretService $secretService, $name = null)
-    {
+    public function __construct(
+        ImportSecretService $secretService,
+        InputArgumentFactory $inputArgFactory,
+        $name = null
+    ) {
+        $this->inputArgFactory = $inputArgFactory;
         $this->secretService = $secretService;
+
         parent::__construct($name);
     }
 
+    /**
+     * Configures the current command.
+     */
     protected function configure()
     {
         $this->setName('vault:import');
         $this->setDescription('Imports secrets from a vault instance');
-        $this->setDefinition(
-            $this->getOptionsList()
-        );
+        $this->setDefinition($this->getArgumentList());
 
         parent::configure();
     }
@@ -61,56 +80,63 @@ class ImportSecrets extends Command
     {
         try {
             $this->secretService->importSecrets(
-                $input->getOption(self::HOST_OPTION),
-                $input->getOption(self::TOKEN_OPTION),
-                $input->getOption(self::SECRET_PATH_OPTION),
-                $input->getOption(self::PATH_PREFIX_OPTION)
+                $input->getArgument(self::HOST_ARG),
+                $input->getArgument(self::TOKEN_ARG),
+                $input->getArgument(self::SECRET_PATH_ARG),
+                $input->getArgument(self::PATH_PREFIX_ARG)
             );
         } catch (\Exception $exception) {
-            $output->writeln("Could not fetch secrets or write config value: {$exception->getMessage()}");
+            $output->writeln(
+                'Could not fetch secrets or write config value:' . PHP_EOL .
+                $exception->getMessage()
+            );
 
             return Cli::RETURN_FAILURE;
         }
 
         $output->writeln(
-            "Successfully imported secrets from  {$input->getOption(self::HOST_OPTION)}/{$input->getOption(self::SECRET_PATH_OPTION)}"
+            'Successfully imported secrets from ' .
+            $input->getArgument(self::HOST_ARG) .
+            '/' .
+            $input->getArgument(self::SECRET_PATH_ARG)
         );
 
         return Cli::RETURN_SUCCESS;
     }
 
     /**
-     * {@inheritdoc}
-     *
-     * @return InputOption[]
+     * @return InputArgument[]
      */
-    private function getOptionsList(): array
+    private function getArgumentList(): array
     {
         return [
-            new InputOption(
-                self::HOST_OPTION,
-                '-u',
-                InputOption::VALUE_REQUIRED,
-                'The vault server to fetch secrets from.'
+            $this->inputArgFactory->create(
+                [
+                    'name' => self::HOST_ARG,
+                    'mode' => InputArgument::REQUIRED,
+                    'description' => 'The vault server to fetch secrets from, e.g. "https://vault.example.com"'
+                ]
             ),
-            new InputOption(
-                self::TOKEN_OPTION,
-                '-t',
-                InputOption::VALUE_REQUIRED,
-                'Your authentification token for your vault'
+            $this->inputArgFactory->create(
+                [
+                    'name' => self::TOKEN_ARG,
+                    'mode' => InputArgument::REQUIRED,
+                    'description' => 'Your vault login token (e.g. "s.KvAdq5AR1yPHOqsZVabmtdBE". Obtain it by logging into vault.)'
+                ]
             ),
-            new InputOption(
-                self::SECRET_PATH_OPTION,
-                '-s',
-                InputOption::VALUE_REQUIRED,
-                'The storage path of the secret to fetch'
+            $this->inputArgFactory->create(
+                [
+                    'name' => self::SECRET_PATH_ARG,
+                    'mode' => InputArgument::REQUIRED,
+                    'description' => 'The storage path of the secret to fetch, with leading "/", e.g. "/secret/a/b/c"'
+                ]
             ),
-            new InputOption(
-                self::PATH_PREFIX_OPTION,
-                '-c',
-                InputOption::VALUE_OPTIONAL,
-                'A config path to prepent to the secrets keys',
-                ''
+            $this->inputArgFactory->create(
+                [
+                    'name' => self::PATH_PREFIX_ARG,
+                    'mode' => InputArgument::OPTIONAL,
+                    'description' => 'A Magento config path that is prepended with a "/" to every secret key',
+                ]
             ),
         ];
     }
