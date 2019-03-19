@@ -14,11 +14,7 @@ see LICENSE.md for license details
     <type name="Netresearch\VaultImport\Command\ImportSecrets">
         <arguments>
             <argument name="secretService" xsi:type="object">Netresearch\VaultImport\Model\ImportSecretService\Proxy</argument>
+            <argument name="inputArgFactory" xsi:type="object">Symfony\Component\Console\Input\InputArgumentFactory\Proxy</argument>
         </arguments>
     </type>
-    <!--<type name="Netresearch\VaultImport\Model\ImportSecretService">-->
-        <!--<arguments>-->
-            <!--<argument name="processorFacadeFactory" xsi:type="object">Magento\Config\Console\Command\EmulatedAdminhtmlAreaProcessor\Proxy</argument>-->
-        <!--</arguments>-->
-    <!--</type>-->
 </config>

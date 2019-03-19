@@ -11,6 +11,11 @@ use Magento\Framework\App\Config\Value;
 use Magento\Framework\App\Config\ValueInterface;
 use Magento\Framework\Exception\CouldNotSaveException;
 
+/**
+ * Class ConfigSaveService
+ *
+ * @package Netresearch\VaultImport\Model
+ */
 class ConfigSaveService
 {
     /**
@@ -29,7 +34,9 @@ class ConfigSaveService
     }
 
     /**
-     * Store config value under given path and scope
+     * Store config value under given path and scope.
+     *
+     * Loads the backend model belonging to the config path to make sure that e.g. encrypted values are saved properly.
      *
      * @param string $path
      * @param string $value
@@ -38,7 +45,7 @@ class ConfigSaveService
      * @return true
      * @throws CouldNotSaveException
      */
-    public function saveConfigValue($path, $value, $scope, $scopeCode)
+    public function saveConfigValue($path, $value, $scope, $scopeCode): bool
     {
         try {
             /** @var ValueInterface $backendModel */
@@ -48,7 +55,7 @@ class ConfigSaveService
                 $resourceModel->save($backendModel);
             }
         } catch (\Exception $exception) {
-            throw new CouldNotSaveException(__('%1', $exception->getMessage()), $exception);
+            throw new CouldNotSaveException(__($exception->getMessage(), $exception));
         }
 
         return true;

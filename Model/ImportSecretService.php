@@ -7,8 +7,14 @@ declare(strict_types=1);
 namespace Netresearch\VaultImport\Model;
 
 use Magento\Config\Console\Command\EmulatedAdminhtmlAreaProcessor;
+use Magento\Framework\App\ScopeInterface;
 use Netresearch\VaultImport\Webservice\VaultClientAdapterInterface;
 
+/**
+ * Class ImportSecretService
+ *
+ * @package Netresearch\VaultImport\Model
+ */
 class ImportSecretService
 {
     /**
@@ -22,29 +28,29 @@ class ImportSecretService
     private $emulatedAreaProcessor;
 
     /**
-     * @var ConfigSaveServiceFactory
+     * @var ConfigSaveService
      */
-    private $saveServiceFactory;
+    private $saveService;
 
     /**
      * ImportSecretService constructor.
      *
      * @param VaultClientAdapterInterface $vault
      * @param EmulatedAdminhtmlAreaProcessor $emulatedAreaProcessor
-     * @param ConfigSaveServiceFactory $saveServiceFactory
+     * @param ConfigSaveService $saveService
      */
     public function __construct(
         VaultClientAdapterInterface $vault,
         EmulatedAdminhtmlAreaProcessor $emulatedAreaProcessor,
-        ConfigSaveServiceFactory $saveServiceFactory
+        ConfigSaveService $saveService
     ) {
         $this->vault = $vault;
         $this->emulatedAreaProcessor = $emulatedAreaProcessor;
-        $this->saveServiceFactory = $saveServiceFactory;
+        $this->saveService = $saveService;
     }
 
     /**
-     * Import secrets from vault storage recursively
+     * Import secrets from vault storage to Magento database
      *
      * @param string $vaultUri
      * @param string $vaultToken
@@ -53,13 +59,14 @@ class ImportSecretService
      * @param string $scope
      * @param int|string $scopeCode
      * @throws \Psr\Cache\InvalidArgumentException
+     * @throws \Exception
      */
     public function importSecrets(
         $vaultUri,
         $vaultToken,
         $secretPath,
         $pathPrefix = '',
-        $scope = 'default',
+        $scope = ScopeInterface::SCOPE_DEFAULT,
         $scopeCode = 0
     ) {
         $secrets = $this->vault->fetchSecret($vaultUri, $vaultToken, $secretPath);
@@ -67,7 +74,9 @@ class ImportSecretService
     }
 
     /**
-     * Recursive processing of secrets array
+     * Save all values from the secrets array in the config database.
+     *
+     * If there are nested arrays, this will resolve them recursively to individual values.
      *
      * @param string[] $secrets
      * @param string $basePath
@@ -100,8 +109,7 @@ class ImportSecretService
     {
         $this->emulatedAreaProcessor->process(
             function () use ($path, $value, $scope, $scopeCode) {
-
-                return $this->saveServiceFactory->create()->saveConfigValue(
+                return $this->saveService->saveConfigValue(
                     $path,
                     $value,
                     $scope,

@@ -11,12 +11,11 @@ use Vault\Transports\Transport;
 
 /**
  * Class GuzzleWrapper
+ *
  * Provides implementation for Vault\Transports\Transport using the GuzzleHttp\Client
  *
  * @author Paul Siedler <paul.siedler@netresearch.de>
  * @link http://www.netresearch.de/
  */
 class GuzzleWrapper extends Client implements Transport
-{
-
-}
+{}

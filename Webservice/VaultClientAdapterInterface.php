@@ -6,6 +6,11 @@ declare(strict_types=1);
 
 namespace Netresearch\VaultImport\Webservice;
 
+/**
+ * Interface VaultClientAdapterInterface
+ *
+ * @package Netresearch\VaultImport\Webservice
+ */
 interface VaultClientAdapterInterface
 {
     /**
@@ -17,5 +22,5 @@ interface VaultClientAdapterInterface
      * @return string[]
      * @throws \Psr\Cache\InvalidArgumentException
      */
-    public function fetchSecret($uri, $token, $secretPath);
+    public function fetchSecret($uri, $token, $secretPath): array;
 }
