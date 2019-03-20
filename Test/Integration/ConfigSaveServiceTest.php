@@ -4,6 +4,7 @@
  */
 namespace Netresearch\VaultImport\Test;
 
+use Magento\Config\App\Config\Type\System;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\App\Config\Storage\Writer;
 use Magento\Store\Model\ScopeInterface;
@@ -35,17 +36,27 @@ class ConfigSaveServiceTest extends TestCase
     private $configWriter;
 
     /**
+     * @var System
+     */
+    private $systemConfigType;
+
+    /**
      * Initialize Dependencies
      */
     protected function setUp()
     {
         $this->objectManager = \Magento\TestFramework\Helper\Bootstrap::getObjectManager();
-        $this->scopeConfig = $this->objectManager->create(ScopeConfigInterface::class);
+        $this->scopeConfig = $this->objectManager->get(ScopeConfigInterface::class);
         $this->configWriter = $this->objectManager->create(Writer::class);
+        $this->systemConfigType = $this->objectManager->get(System::class);
 
         parent::setUp();
     }
 
+    /**
+     * @magentoDbIsolation enabled
+     * @throws \Magento\Framework\Exception\CouldNotSaveException
+     */
     public function testValuesAreCorrectlyStoredInMagentoConfigTable()
     {
         /** @var ConfigSaveService $subject */
@@ -53,6 +64,8 @@ class ConfigSaveServiceTest extends TestCase
 
         $subject->saveConfigValue('testpath', 'testvalue_default', ScopeConfigInterface::SCOPE_TYPE_DEFAULT, 0);
         $subject->saveConfigValue('testpath', 'testvalue_website', ScopeInterface::SCOPE_WEBSITES, 1);
+        /** Invalidate the system config cache to allow reading the new values in the same request. */
+        $this->systemConfigType->clean();
 
         $valueDefault = $this->scopeConfig->getValue(
             'testpath',
@@ -87,16 +100,5 @@ class ConfigSaveServiceTest extends TestCase
             0
         );
         self::assertEquals('testvalue_default', $valueStore0);
-    }
-
-    /**
-     * Remove config values used during testing
-     */
-    protected function tearDown()
-    {
-        $this->configWriter->delete('testpath', ScopeConfigInterface::SCOPE_TYPE_DEFAULT, 0);
-        $this->configWriter->delete('testpath', ScopeInterface::SCOPE_WEBSITES, 1);
-
-        parent::tearDown();
     }
 }
