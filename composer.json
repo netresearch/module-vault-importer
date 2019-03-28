@@ -18,6 +18,10 @@
         {
             "name": "Paul Siedler",
             "email": "paul.siedler@netresearch.de"
+        },
+        {
+            "name": "Max Melzer",
+            "email": "max.melzer@netresearch.de"
         }
     ],
     "autoload": {

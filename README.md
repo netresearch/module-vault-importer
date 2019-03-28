@@ -11,12 +11,11 @@ Extension to provide CLI commands to import secrets from vault into Magento's co
 This Magento® 2 Module enables you to import secrets from a [Vault](https://www.vaultproject.io/)
 secret storage and apply them to the Magento config.
 
-Values stored as JSON within Vault will be recursively stored in the Magento® `core.config.data`
+Values stored as JSON within Vault will be recursively stored in the Magento® `core_config_data`
 database table.
 
 ## Requirements
 
-* PHP 5.6.5
 * PHP >= 7.0.6
 * PHP >= 7.1.0
 * PHP >= 7.2.0
