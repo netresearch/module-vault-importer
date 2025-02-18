@@ -5,7 +5,7 @@
     "type": "magento2-module",
     "description": "Module to add cli commands to import secrets from vault",
     "require": {
-        "php": "7.0.2|7.0.4|~7.0.6|~7.1.0|~7.2.0",
+        "php": "8.4.4",
         "ext-json": "*",
         "magento/framework": "^101.0.0 || ^102.0.0",
         "csharpru/vault-php": "^4.0.0",
