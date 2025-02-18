@@ -8,7 +8,7 @@
         "php": "7.0.2|7.0.4|~7.0.6|~7.1.0|~7.2.0",
         "ext-json": "*",
         "magento/framework": "^101.0.0 || ^102.0.0",
-        "csharpru/vault-php": "^3.6.0",
+        "csharpru/vault-php": "^4.0.0",
         "magento/module-config": "^101.0.0 || ^102.0.0"
     },
     "require-dev": {
